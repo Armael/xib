@@ -367,9 +367,9 @@ class Bridge:
 		if on_xmpp:
 			self._say_on_xmpp(message)
 		if on_irc:
-			self._say_on_irc(message)
-	
-	
+			self._say_on_irc(message, false)
+
+
 	def say_on_behalf(self, nickname, message, on_protocol, action=False):
 		if action:
 			message = '* '+nickname+' '+message
@@ -379,12 +379,15 @@ class Bridge:
 		if on_protocol == 'xmpp':
 			self._say_on_xmpp(message)
 		elif on_protocol == 'irc':
-			self._say_on_irc(message)
-	
-	
-	def _say_on_irc(self, message):
+			self._say_on_irc(message, true)
+
+
+	def _say_on_irc(self, message, toxic):
 		try:
-			self.irc_connection.privmsg(self.irc_room, message)
+                        if toxic:
+                                self.irc_connection.notice(self.irc_room, message)
+                        else:
+                                self.irc_connection.privmsg(self.irc_room, message)
 		except irclib.ServerNotConnectedError:
 			bridges = self.bot.iter_bridges(irc_server=self.irc_server)
 			self.bot.restart_bridges_delayed(bridges, 0, say_levels.error, 'Lost bot IRC connection', protocol='irc')
